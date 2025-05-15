@@ -25,6 +25,7 @@ public class MyPropRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        System.out.println("Logger 구현체 => " + logger.getClass().getName());
         logger.info("${myprop.username}: {}", username);
         logger.info("${myprop.port}: {}", port);
 
