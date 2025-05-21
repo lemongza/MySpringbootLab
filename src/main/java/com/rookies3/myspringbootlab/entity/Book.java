@@ -1,13 +1,15 @@
 package com.rookies3.myspringbootlab.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "books")
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
 public class Book {
@@ -23,4 +25,10 @@ public class Book {
     private String isbn;
     private Integer price;
     public LocalDate publishDate;
+
+    //1:1 지연로딩
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "book", cascade = CascadeType.ALL)
+    private BookDetail bookDetail;
+
+
 }
