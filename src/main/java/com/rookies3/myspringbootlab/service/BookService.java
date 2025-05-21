@@ -34,7 +34,7 @@ public class BookService {
     }
 
 
-    public BookDTO.BookResponse getBookBtIsbn(String isbn) {
+    public BookDTO.BookResponse getBookByIsbn(String isbn) {
         Book book = bookRepository.findByIsbn(isbn)
                 .orElseThrow(() -> new BusinessException("Book not found"));
         return BookDTO.BookResponse.from(book);
