@@ -22,7 +22,7 @@ public class BookDetail {
     @Column
     private String language;
     @Column
-    private String pageCount;
+    private Integer pageCount;
     @Column
     private String publisher;
     @Column
@@ -31,7 +31,7 @@ public class BookDetail {
     private String edition;
 
     //1:1 지연로딩
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade=CascadeType.ALL)
     @JoinColumn(name = "book_id", unique = true)
     private Book book;
 }
