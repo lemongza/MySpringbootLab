@@ -3,7 +3,9 @@ package com.rookies3.myspringbootlab.service;
 
 import com.rookies3.myspringbootlab.controller.dto.BookDTO;
 import com.rookies3.myspringbootlab.entity.Book;
+import com.rookies3.myspringbootlab.entity.BookDetail;
 import com.rookies3.myspringbootlab.exception.BusinessException;
+import com.rookies3.myspringbootlab.repository.BookDetailRepository;
 import com.rookies3.myspringbootlab.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookDetailRepository bookDetailRepository;
+
 
     public List<BookDTO.BookResponse> getAllBooks() {
         return bookRepository.findAll()
@@ -41,23 +45,45 @@ public class BookService {
     }
 
     public List<BookDTO.BookResponse> getBooksByAuthor(String author) {
-        return bookRepository.findByAuthor(author)
+        return bookRepository.findByAuthorContainingIgnoreCase(author)
+                .stream()
+                .map(BookDTO.BookResponse::from)
+                .collect(Collectors.toList());
+    }
+    public List<BookDTO.BookResponse> getBooksByTitle(String title) {
+        return bookRepository.findByTitleContainingIgnoreCase(title)
                 .stream()
                 .map(BookDTO.BookResponse::from)
                 .collect(Collectors.toList());
     }
 
-    public BookDTO.BookResponse createBook(BookDTO.BookCreateRequest request) {
-        Book book = request.toEntity();
+    @Transactional
+    public BookDTO.BookResponse createBook(BookDTO.Request request) {
+        if (isIsbnDuplicate(request.getIsbn())) {
+            throw new BusinessException("Isbn duplicate");
+        }
+        Book book = Book.builder()
+                .title(request.getTitle())
+                .author(request.getAuthor())
+                .isbn(request.getIsbn())
+                .price(request.getPrice())
+                .publishDate(request.getPublishDate())
+                .build();
+
         Book savedbook = bookRepository.save(book);
         return BookDTO.BookResponse.from(savedbook);
     }
 
-    public BookDTO.BookResponse updateBook(Long id, BookDTO.BookUpdateRequest request) {
+    @Transactional
+    public BookDTO.BookResponse updateBook(Long id, BookDTO.Request request) {
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Book not found"));
         book.setTitle(request.getTitle());
         book.setAuthor(request.getAuthor());
+        book.setIsbn(request.getIsbn());
+        book.setPrice(request.getPrice());
+        book.setPublishDate(request.getPublishDate());
+
         return BookDTO.BookResponse.from(bookRepository.save(book));
 
     }
@@ -66,4 +92,8 @@ public class BookService {
         bookRepository.deleteById(id);
     }
 
+
+    public boolean isIsbnDuplicate(String isbn) {
+        return bookRepository.findByIsbn(isbn).isPresent();
+    }
 }
